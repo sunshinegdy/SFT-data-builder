@@ -26,10 +26,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 添加新的状态来存储 AI 生成的多条建议
-  const [aiSuggestions, setAiSuggestions] = useState([]);
-  const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
-
   // 当 dataList 改变时，保存到 localStorage
   useEffect(() => {
     localStorage.setItem('aiTrainingData', JSON.stringify(dataList));
@@ -127,7 +123,7 @@ function App() {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('下载出错:', error);
-      alert('下载失败，请查控制台错误信息');
+      alert('下载失败，请检查控制台错误信息');
     }
   };
 
@@ -209,23 +205,29 @@ function App() {
           messages: [
             {
               role: 'system',
-              content: `你是一个大模型训练数据生成助手。请将用户输入的内容转换为多条训练数据，每条都符合以下格式，并确保返回的是一个有效的JSON数组：
-              [
-                {
-                  "instruction": "用户指令",
-                  "input": "用户输入（可选）",
-                  "output": "AI回答",
-                  "system": "系统提示词（可选）",
-                  "history": [["历史问题1", "历史回答1"], ["历史问题2", "历史回答2"]]
-                }
-              ]
-              
-              请生成3-5条不同的训练数据。确保每条数据都有不同的角度或重点。
-              注意：请确保返回的是一个标准的JSON数组，不要添加任何额外的格式或说明。`
+              content: `你是一个大模型训练数据生成助手。请将用户输入的内容转换为以下JSON格式的训练数据：
+              {
+                "instruction": "用户指令",
+                "input": "用户输入（可选）",
+                "output": "AI回答",
+                "system": "系统提示词（可选）",
+                "history": [["历史问题1", "历史回答1"], ["历史问题2", "历史回答2"]]
+              }
+
+              一个完整的例子：
+              {
+                "instruction": "请帮我写一篇关于人工智能的文章，要求800字左右。",
+                "input": "文章需要包含以下关键点：1. AI的定义 2. AI的应用领域 3. AI的未来发展",
+                "output": "人工智能（AI）是一门致力于研究和开发能够模拟、延伸和扩展人类智能的计算机科学领域...（此处是一篇完整的800字文章）",
+                "system": "你是一位专业的文章写作助手，擅长创作各类主题的文章。你会根据用户的要求，写出结构清晰、内容丰富的文章。",
+                "history": [["这篇文章能否加入一些具体的AI应用案例？", "好的，我来补充一些AI应用案例。在医疗领域，AI被用于..."]]
+              }
+                
+              `
             },
             {
               role: 'user',
-              content: `请将以下内容转换为多条训练数据：\n${content}`
+              content: `请将以下内容转换为训练数据，记得要先完善对应的内容后再按格式输出，就是说这个原始数据为了生成对应格式的数据，需要按对应的键生成对应的值，再最后格式化输出：\n${content}`
             }
           ],
           stream: false
@@ -237,80 +239,39 @@ function App() {
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
+      console.log('API Response:', data); // 添加日志以便调试
 
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const aiResponse = data.choices[0].message.content;
         try {
-          // 改进的 JSON 提取逻辑
-          let jsonContent;
+          // 尝试从响应中提取 JSON 字符串
+          const jsonMatch = aiResponse.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
+                           aiResponse.match(/\{[\s\S]*?\}/);
           
-          // 尝试多种可能的格式
-          const patterns = [
-            /```json\s*(\[[\s\S]*?\])\s*```/, // Markdown 代码块格式
-            /```\s*(\[[\s\S]*?\])\s*```/,     // 普通代码块格式
-            /(\[[\s\S]*?\])/                   // 纯 JSON 数组格式
-          ];
-
-          for (const pattern of patterns) {
-            const match = aiResponse.match(pattern);
-            if (match) {
-              try {
-                const extracted = match[1].trim();
-                // 尝试解析提取的内容
-                const parsed = JSON.parse(extracted);
-                if (Array.isArray(parsed)) {
-                  jsonContent = parsed;
-                  break;
-                }
-              } catch (e) {
-                console.log('当前模式解析失败，尝试下一个模式');
-              }
-            }
-          }
-
-          // 如果所有模式都失败，尝试直接解析整个响应
-          if (!jsonContent) {
-            try {
-              const parsed = JSON.parse(aiResponse);
-              if (Array.isArray(parsed)) {
-                jsonContent = parsed;
-              }
-            } catch (e) {
-              console.log('直接解析失败');
-            }
-          }
-
-          if (jsonContent && Array.isArray(jsonContent)) {
-            // 验证和清理每个数据项
-            const cleanedResponses = jsonContent.map(item => ({
-              instruction: (item.instruction || '').trim(),
-              input: (item.input || '').trim(),
-              output: (item.output || '').trim(),
-              system: (item.system || '').trim(),
-              history: Array.isArray(item.history) ? item.history.map(([q, a]) => [
-                (q || '').trim(),
-                (a || '').trim()
-              ]) : [['', '']]
-            })).filter(item => item.instruction && item.output); // 只保留有必填字段的数据
-
-            if (cleanedResponses.length > 0) {
-              setAiSuggestions(cleanedResponses);
-              setCurrentSuggestionIndex(0);
-              setFormData(cleanedResponses[0]);
-              setError(null);
-            } else {
-              throw new Error('没有找到有效的训练数据');
-            }
+          if (jsonMatch) {
+            const jsonStr = jsonMatch[1] || jsonMatch[0];
+            const parsedResponse = JSON.parse(jsonStr);
+            setFormData({
+              instruction: parsedResponse.instruction || '',
+              input: parsedResponse.input || '',
+              output: parsedResponse.output || '',
+              system: parsedResponse.system || '',
+              history: parsedResponse.history || [['', '']]
+            });
           } else {
-            throw new Error('未能提取有效的 JSON 数组');
+            // 如果没有找到 JSON，将原始响应放在 output 中
+            setFormData({
+              instruction: '处理以下内容',
+              input: content,
+              output: aiResponse,
+              system: '',
+              history: [['', '']]
+            });
           }
         } catch (parseError) {
-          console.error('JSON 处理失败:', parseError);
-          setError(`数据处理失败: ${parseError.message}`);
-          // 将原始响应显示在输出中，方便调试
+          console.error('JSON 解析失败:', parseError);
           setFormData({
-            instruction: '解析原始响应',
+            instruction: '处理以下内容',
             input: content,
             output: aiResponse,
             system: '',
@@ -326,46 +287,6 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // 添加切换建议的函数
-  const showNextSuggestion = () => {
-    const nextIndex = (currentSuggestionIndex + 1) % aiSuggestions.length;
-    setCurrentSuggestionIndex(nextIndex);
-    setFormData(aiSuggestions[nextIndex]);
-  };
-
-  const showPreviousSuggestion = () => {
-    const prevIndex = currentSuggestionIndex === 0 
-      ? aiSuggestions.length - 1 
-      : currentSuggestionIndex - 1;
-    setCurrentSuggestionIndex(prevIndex);
-    setFormData(aiSuggestions[prevIndex]);
-  };
-
-  // 在表单区域上方添加建议导航组件
-  const SuggestionNavigation = () => {
-    if (aiSuggestions.length <= 1) return null;
-    
-    return (
-      <div className="flex items-center justify-between mb-4 bg-gray-100 p-4 rounded-lg">
-        <button
-          onClick={showPreviousSuggestion}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          上一个建议
-        </button>
-        <div className="text-gray-700">
-          建议 {currentSuggestionIndex + 1} / {aiSuggestions.length}
-        </div>
-        <button
-          onClick={showNextSuggestion}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          下一个建议
-        </button>
-      </div>
-    );
   };
 
   return (
@@ -434,7 +355,6 @@ function App() {
           </div>
 
           <div className="space-y-4 mt-6">
-            {aiSuggestions.length > 0 && <SuggestionNavigation />}
             <div className="space-y-6">
               {/* 表单字段 */}
               <div>
@@ -499,7 +419,7 @@ function App() {
                     <textarea
                       value={item[0]}
                       onChange={(e) => handleHistoryChange(index, 'instruction', e.target.value)}
-                      placeholder="例如：��篇文章能否加入一些具体的AI应用案例？"
+                      placeholder="例如：这篇文章能否加入一些具体的AI应用案例？"
                       className="flex-1 h-24 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <textarea
