@@ -466,7 +466,7 @@ function App() {
         } catch (parseError) {
           console.error('JSON 处理失败:', parseError);
           setError(`数据处理失败: ${parseError.message}`);
-          // 将原始响应显示在输出中，方便调试
+          // 将原始���应显示在输出中，方便调试
           setFormData({
             instruction: '解析原始响应',
             input: content,
@@ -652,7 +652,7 @@ function App() {
                     历史对话 (选填)
                   </h2>
                   <span className="text-sm text-gray-500">
-                    用于记录之前的对话内容
+                    ��于记录之前的对话内容
                   </span>
                 </div>
                 {formData.history.map((item, index) => (
