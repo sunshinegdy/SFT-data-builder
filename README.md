@@ -4,6 +4,10 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
 
+<img width="861" alt="9b4091862e78e2aa0d7c75f55be170e" src="https://github.com/user-attachments/assets/20f2e6e0-58aa-48db-8740-e0f4dd615c82">
+<img width="861" alt="bdf3216ff120ba2d587ac07b9d3fb47" src="https://github.com/user-attachments/assets/0f244e7a-d3a7-404a-bdc6-3caa50b13b5f">
+
+
 <p align="center">
   <img src="docs/images/demo.gif" alt="演示" width="800">
 </p>
