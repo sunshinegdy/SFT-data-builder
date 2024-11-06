@@ -531,7 +531,7 @@ function App() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-            大模型训练数据生成助手-公众号：正经人王同学
+            大模型训练数据生成助手(合成数据)-公众号：正经人王同学
           </h1>
 
           {/* 添加配置组件 */}
