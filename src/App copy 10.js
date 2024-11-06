@@ -94,56 +94,6 @@ function App() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                选择模型:
-              </label>
-              <select
-                value={tempConfig.model}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === 'custom') {
-                    // 如果选择自定义，保持当前的自定义模型名称
-                    setTempConfig({
-                      ...tempConfig,
-                      model: tempConfig.customModel || ''
-                    });
-                  } else {
-                    // 如果选择预设模型，更新模型名称
-                    setTempConfig({
-                      ...tempConfig,
-                      model: value,
-                      customModel: '' // 清空自定义模型
-                    });
-                  }
-                }}
-                className="w-full p-2 border rounded-md mb-2"
-              >
-                {defaultConfig.modelOptions.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-                <option value="custom">自定义模型</option>
-              </select>
-              
-              {/* 自定义模型输入框 */}
-              <input
-                type="text"
-                value={tempConfig.customModel}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setTempConfig({
-                    ...tempConfig,
-                    customModel: value,
-                    model: value || tempConfig.model // 如果输入为空，保持原有模型
-                  });
-                }}
-                className="w-full p-2 border rounded-md"
-                placeholder="输入自定义模型名称"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 生成建议数量:
               </label>
               <input
@@ -352,10 +302,6 @@ function App() {
   const generateAIResponse = async (content) => {
     try {
       setIsLoading(true);
-      
-      // 确保有有效的模型名称
-      const modelName = config.model || 'deepseek-chat'; // 使用默认值作为后备
-
       const response = await fetch(`${config.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -363,7 +309,7 @@ function App() {
           'Authorization': `Bearer ${config.apiKey}`
         },
         body: JSON.stringify({
-          model: modelName, // 使用确定的模型名称
+          model: 'deepseek-chat',
           messages: [
             {
               role: 'system',
@@ -573,7 +519,7 @@ function App() {
           {/* 或者直接输入文本 */}
           <div className="mb-8">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              直接输入本:
+              直接输入文本:
             </label>
             <textarea
               value={fileContent}
