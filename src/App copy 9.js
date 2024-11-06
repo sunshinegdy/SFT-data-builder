@@ -302,14 +302,14 @@ function App() {
   const generateAIResponse = async (content) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      const response = await fetch(`${config.baseUrl}/v1/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${config.apiKey}`
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
+          model: 'deepseek-coder ',
           messages: [
             {
               role: 'system',

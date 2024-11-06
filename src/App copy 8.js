@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 // 添加文件解析库
 import { Document, Page, pdfjs } from 'react-pdf';
 import mammoth from 'mammoth';
-// 导入默认配置
-import defaultConfig from './config';
 
 // 设置pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -31,108 +29,6 @@ function App() {
   // 添加新的状态来存储 AI 生成的多条建议
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
-
-  // 在状态声明部分添加新的状态
-  const [config, setConfig] = useState(() => {
-    const savedConfig = localStorage.getItem('aiGeneratorConfig');
-    return savedConfig ? JSON.parse(savedConfig) : defaultConfig;
-  });
-
-  // 添加配置保存函数
-  const saveConfig = (newConfig) => {
-    setConfig(newConfig);
-    localStorage.setItem('aiGeneratorConfig', JSON.stringify(newConfig));
-  };
-
-  // 添加配置表单组件
-  const ConfigurationForm = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [tempConfig, setTempConfig] = useState(config);
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      saveConfig(tempConfig);
-      setIsOpen(false);
-    };
-
-    return (
-      <div className="mb-8">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-        >
-          {isOpen ? '关闭配置' : '打开配置'}
-        </button>
-
-        {isOpen && (
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4 p-4 border rounded-lg bg-gray-50">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                API Base URL:
-              </label>
-              <input
-                type="text"
-                value={tempConfig.baseUrl}
-                onChange={(e) => setTempConfig({...tempConfig, baseUrl: e.target.value})}
-                className="w-full p-2 border rounded-md"
-                placeholder="https://api.deepseek.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                API Key:
-              </label>
-              <input
-                type="password"
-                value={tempConfig.apiKey}
-                onChange={(e) => setTempConfig({...tempConfig, apiKey: e.target.value})}
-                className="w-full p-2 border rounded-md"
-                placeholder="输入你的 API Key"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                生成建议数量:
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="10"
-                value={tempConfig.suggestionsCount}
-                onChange={(e) => setTempConfig({
-                  ...tempConfig, 
-                  suggestionsCount: Math.min(10, Math.max(1, parseInt(e.target.value) || 1))
-                })}
-                className="w-full p-2 border rounded-md"
-              />
-              <p className="text-sm text-gray-500 mt-1">建议范围：1-10条</p>
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                保存配置
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setTempConfig(defaultConfig);
-                  setIsOpen(false);
-                }}
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-              >
-                恢复默认
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-    );
-  };
 
   // 当 dataList 改变时，保存到 localStorage
   useEffect(() => {
@@ -302,18 +198,18 @@ function App() {
   const generateAIResponse = async (content) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
+          'Authorization': `Bearer ${process.env.REACT_APP_DEEPSEEK_API_KEY}`
         },
         body: JSON.stringify({
           model: 'deepseek-chat',
           messages: [
             {
               role: 'system',
-              content: `你是一个大模型训练数据生成助手。请将用户输入的内容转换为${config.suggestionsCount}条训练数据，每条都符合以下格式，并确保返回的是一个有效的JSON数组：
+              content: `你是一个大模型训练数据生成助手。请将用户输入的内容转换为多条训练数据，每条都符合以下格式，并确保返回的是一个有效的JSON数组：
               [
                 {
                   "instruction": "用户指令",
@@ -324,12 +220,12 @@ function App() {
                 }
               ]
               
-              确保每条数据都有不同的角度或重点。
+              请生成3-5条不同的训练数据。确保每条数据都有不同的角度或重点。
               注意：请确保返回的是一个标准的JSON数组，不要添加任何额外的格式或说明。`
             },
             {
               role: 'user',
-              content: `请将以下内容转换为${config.suggestionsCount}条训练数据：\n${content}`
+              content: `请将以下内容转换为多条训练数据：\n${content}`
             }
           ],
           stream: false
@@ -480,9 +376,6 @@ function App() {
             大模型训练数据生成助手-公众号：正经人王同学
           </h1>
 
-          {/* 添加配置组件 */}
-          <ConfigurationForm />
-
           {/* 添加文件上传区域 */}
           <div className="mb-8">
             <div className="flex items-center justify-center w-full">
@@ -606,7 +499,7 @@ function App() {
                     <textarea
                       value={item[0]}
                       onChange={(e) => handleHistoryChange(index, 'instruction', e.target.value)}
-                      placeholder="例如：这篇文章能否加入一些具体的AI应用案例？"
+                      placeholder="例如：��篇文章能否加入一些具体的AI应用案例？"
                       className="flex-1 h-24 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <textarea
