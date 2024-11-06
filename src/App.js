@@ -466,7 +466,7 @@ function App() {
         } catch (parseError) {
           console.error('JSON 处理失败:', parseError);
           setError(`数据处理失败: ${parseError.message}`);
-          // 将原始���应显示在输出中，方便调试
+          // 将原始应显示在输出中，方便调试
           setFormData({
             instruction: '解析原始响应',
             input: content,
@@ -526,6 +526,42 @@ function App() {
     );
   };
 
+  // 在 App 组件的状态声明部分添加新状态
+  const [articleUrl, setArticleUrl] = useState('');
+
+  // 在 generateAIResponse 函数之前添加新的处理函数
+  const handleArticleUrlSubmit = async () => {
+    if (!articleUrl) {
+      setError('请输入文章链接');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // 构建 r.jina.ai 链接
+      const jinaUrl = `https://r.jina.ai/${articleUrl}`;
+      
+      // 获取文章内容
+      const response = await fetch(jinaUrl);
+      if (!response.ok) {
+        throw new Error('获取文章内容失败');
+      }
+      
+      const content = await response.text();
+      setFileContent(content);
+      
+      // 自动生成 AI 响应
+      await generateAIResponse(content);
+    } catch (err) {
+      console.error('文章提取错误:', err);
+      setError(`文章内容提取失败: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
@@ -568,6 +604,33 @@ function App() {
                 {error}
               </div>
             )}
+          </div>
+
+          {/* 在文件上传区域后添加文章链接输入区 */}
+          <div className="mb-8">
+            <div className="flex gap-4">
+              <input
+                type="text"
+                value={articleUrl}
+                onChange={(e) => setArticleUrl(e.target.value)}
+                placeholder="输入文章链接，如: https://mp.weixin.qq.com/s/xxx"
+                className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <button
+                onClick={handleArticleUrlSubmit}
+                disabled={!articleUrl || isLoading}
+                className={`px-6 py-2 rounded-md text-white ${
+                  !articleUrl || isLoading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                }`}
+              >
+                提取文章
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-gray-500">
+              支持微信公众号文章等网页链接
+            </p>
           </div>
 
           {/* 或者直接输入文本 */}
@@ -652,7 +715,7 @@ function App() {
                     历史对话 (选填)
                   </h2>
                   <span className="text-sm text-gray-500">
-                    ��于记录之前的对话内容
+                    于记录之前的对话内容
                   </span>
                 </div>
                 {formData.history.map((item, index) => (
