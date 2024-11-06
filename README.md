@@ -1,70 +1,117 @@
-# Getting Started with Create React App
+# 🤖 大模型训练数据生成助手-公众号：正经人王同学
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
 
-## Available Scripts
+<p align="center">
+  <img src="docs/images/demo.gif" alt="演示" width="800">
+</p>
 
-In the project directory, you can run:
+## ✨ 特性
 
-### `npm start`
+- 🎯 **一键生成训练数据**：将普通文本秒变高质量AI训练数据
+- 🔄 **批量生成**：一次生成多条不同角度的训练数据
+- 📝 **灵活编辑**：所有生成的数据都可以随时编辑和调整
+- 💾 **本地存储**：自动保存所有数据到本地
+- 📤 **导出简单**：一键导出标准格式JSON文件
+- 🎨 **优雅界面**：简洁直观的用户界面，操作便捷
+- 🔌 **多模型支持**：支持多种主流AI模型，可自定义模型
+- 📚 **多格式支持**：支持PDF、Word、TXT等多种文件格式
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 快速开始
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 安装依赖 
+```bash
+npm install
+```
+### 启动项目
+```bash
+npm run start
+```
 
-### `npm test`
+## 📖 使用指南
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. **配置API**
+   - 点击"打开配置"按钮
+   - 设置API地址和密钥
+   - 选择或自定义AI模型
+   - 设置每次生成的数据条数
 
-### `npm run build`
+2. **输入内容**
+   - 上传文件（支持PDF、DOCX、TXT）
+   - 或直接输入文本内容
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **生成数据**
+   - 点击"生成AI响应"按钮
+   - 在多个生成结果中切换
+   - 根据需要编辑生成的内容
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+4. **管理数据**
+   - 添加到数据列表
+   - 预览所有生成的数据
+   - 删除不需要的数据
+   - 导出为JSON文件
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🎯 训练数据格式
+json
+{
+"instruction": "用户指令",
+"input": "用户输入（可选）",
+"output": "AI回答",
+"system": "系统提示词（可选）",
+"history": [
+["历史问题1", "历史回答1"],
+["历史问题2", "历史回答2"]
+]
+}
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🛠️ 技术栈
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- ⚛️ React 18
+- 🎨 TailwindCSS
+- 📄 PDF.js
+- 📝 Mammoth.js
+- 💾 LocalStorage API
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📋 待办功能
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- [ ] 支持更多文件格式
+- [ ] 添加数据验证功能
+- [ ] 批量导入功能
+- [ ] 数据标签系统
+- [ ] 导出更多格式
 
-## Learn More
+## 🤝 贡献指南
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交改动 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 提交 Pull Request
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📜 许可证
 
-### Code Splitting
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 👨‍💻 作者
 
-### Analyzing the Bundle Size
+正经人王同学
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- 微信公众号：正经人王同学
+- 微信:whatisallineed
+- GitHub：[https://github.com/zjrwtx](https://github.com/zjrwtx)
+- Email：[3038880699@qq.com](mailto:3038880699@qq.com)
 
-### Making a Progressive Web App
+## 🌟 Star 历史
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+[![Star History Chart](https://api.star-history.com/svg?repos=zjrwtx/SFT-data-builder&type=Date)](https://star-history.com/#zjrwtx/SFT-data-builder&Date)
 
-### Advanced Configuration
+## 🙏 鸣谢
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+感谢所有为这个项目做出贡献的开发者！
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+如果这个项目对你有帮助，请给一个 ⭐️ 鼓励一下！
