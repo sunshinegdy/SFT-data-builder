@@ -1,5 +1,6 @@
 # 🤖 大模型训练数据生成助手(合成数据)-公众号：正经人王同学
 在线体验地址：https://sft-data-builder.vercel.app
+演示视频：https://www.bilibili.com/video/BV1dvDQYBEew/?spm_id_from=333.999.0.0
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
