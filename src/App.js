@@ -356,7 +356,7 @@ function App() {
       // 确保有有效的模型名称
       const modelName = config.model || 'deepseek-chat'; // 使用默认值作为后备
 
-      const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      const response = await fetch(`${config.baseUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,9 +1,10 @@
 const defaultConfig = {
-  baseUrl: 'https://api.deepseek.com',
+  baseUrl: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
   apiKey: '',
   suggestionsCount: 3,
-  model: 'deepseek-chat',
+  model: 'glm-4-flash',
   modelOptions: [
+    'glm-4-flash',
     'deepseek-chat',
     'deepseek-coder',
     'gpt-3.5-turbo',
