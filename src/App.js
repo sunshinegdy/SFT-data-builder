@@ -364,6 +364,7 @@ function App() {
         },
         body: JSON.stringify({
           model: modelName, // 使用确定的模型名称
+          max_tokens: 4096,
           messages: [
             {
               role: 'system',
