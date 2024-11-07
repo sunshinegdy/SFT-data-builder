@@ -4,9 +4,10 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
+<img width="815" alt="2ec7decced490a82cd1b9bef3d4f04b" src="https://github.com/user-attachments/assets/76578882-d22c-4820-995e-ed62e8b0fa44">
 
 <img width="861" alt="9b4091862e78e2aa0d7c75f55be170e" src="https://github.com/user-attachments/assets/20f2e6e0-58aa-48db-8740-e0f4dd615c82">
-<img width="861" alt="bdf3216ff120ba2d587ac07b9d3fb47" src="https://github.com/user-attachments/assets/0f244e7a-d3a7-404a-bdc6-3caa50b13b5f">
+
 
 
 <p align="center">
@@ -15,7 +16,7 @@
 
 ## ✨ 特性
 
-- 🎯 **一键生成训练数据**：将普通文本秒变高质量AI训练数据 支持直接从微信公众号文章等链接内容生成训练数据
+- 🎯 **一键生成训练数据**：支持众多openai格式调用的本地或云端模型（包括GLM flash等免费调用模型） 将普通文本秒变高质量AI训练数据 支持直接从微信公众号文章等链接内容生成训练数据
 - 🔄 **批量生成**：一次生成多条不同角度的训练数据
 - 📝 **灵活编辑**：所有生成的数据都可以随时编辑和调整
 - 💾 **本地存储**：自动保存所有数据到本地
