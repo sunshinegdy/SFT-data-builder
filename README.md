@@ -1,6 +1,6 @@
 # 🤖 大模型训练数据生成助手(合成数据)-公众号：正经人王同学
 在线体验地址：https://sft-data-builder.vercel.app
-演示视频：https://www.bilibili.com/video/BV1dvDQYBEew/?spm_id_from=333.999.0.0
+演示视频：[https://www.bilibili.com/video/BV1dvDQYBEew/?spm_id_from=333.999.0.0](https://www.bilibili.com/video/BV19qD6YqEJ2/?spm_id_from=333.999.0.0)
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
@@ -18,13 +18,20 @@
 ## ✨ 特性
 
 - 🎯 **一键生成训练数据**：支持众多openai格式调用的本地或云端模型（包括GLM-4-Flash等免费调用模型） 将普通文本秒变高质量AI训练数据 支持直接从微信公众号文章等链接内容生成训练数据
-- 🔄 **批量生成**：一次生成多条不同角度的训练数据
+- 🔄 **批量生成**：一次生成多条不同角度的训练数据、支持批量url文章自动生成批量数据
 - 📝 **灵活编辑**：所有生成的数据都可以随时编辑和调整
 - 💾 **本地存储**：自动保存所有数据到本地
 - 📤 **导出简单**：一键导出标准格式JSON文件
 - 🎨 **优雅界面**：简洁直观的用户界面，操作便捷
 - 🔌 **多模型支持**：支持多种主流AI模型，可自定义模型
 - 📚 **多格式支持**：支持PDF、Word、TXT等多种文件格式
+
+## 📅 更新动态
+
+### v1.1.0 (2024-11-09)
+- ✨ 新增支持批量url文章自动生成批量数据
+- 🔧 优化了数据生成的速度
+- 🐛优化界面
 
 ## 🚀 快速开始
 
@@ -115,9 +122,15 @@ json
 
 [![Star History Chart](https://api.star-history.com/svg?repos=zjrwtx/SFT-data-builder&type=Date)](https://star-history.com/#zjrwtx/SFT-data-builder&Date)
 
-## 🙏 鸣谢
 
-感谢所有为这个项目做出贡献的开发者！
+## 🙏 致谢
+特别感谢以下开源项目和贡献者：
+- [LaiWei魏来](https://github.com/waltonfuture) -提供算法指导等支持
+- 所有提供反馈和建议的用户
+
+
+
+
 
 ---
 
