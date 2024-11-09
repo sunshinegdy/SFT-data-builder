@@ -5,11 +5,10 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
-<img width="815" alt="2ec7decced490a82cd1b9bef3d4f04b" src="https://github.com/user-attachments/assets/76578882-d22c-4820-995e-ed62e8b0fa44">
+<img width="861" alt="bf43020b4c9c7618d0f1fd155043628" src="https://github.com/user-attachments/assets/f058ca25-671f-4d94-a560-5cf2a59d119f">
+<img width="861" alt="90596b8a0362662f8cf70ff8af16db5" src="https://github.com/user-attachments/assets/ab87518f-fea2-4b92-997a-780deb4bc26a">
 
-<img width="861" alt="9b4091862e78e2aa0d7c75f55be170e" src="https://github.com/user-attachments/assets/20f2e6e0-58aa-48db-8740-e0f4dd615c82">
-
-
+<img width="861" alt="2bfe538bbe133542a2235bfd4b90df9" src="https://github.com/user-attachments/assets/9862e5ed-61f3-472a-9802-9368d8d757e6">
 
 <p align="center">
   <img src="docs/images/demo.gif" alt="演示" width="800">
