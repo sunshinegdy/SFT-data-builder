@@ -5,11 +5,73 @@ import mammoth from 'mammoth';
 // 导入默认配置
 import defaultConfig from './config';
 // 在文件顶部添加路由相关的导入
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import BatchProcessor from './components/BatchProcessor';
+import Credits from './components/Credits';
 
 // 设置pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+
+// 创建一个新的导航组件来使用 useLocation
+function Navigation() {
+  const location = useLocation();
+  
+  return (
+    <nav className="mb-8">
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="flex flex-wrap justify-center items-center p-4 gap-2">
+          <Link
+            to="/"
+            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
+              location.pathname === '/'
+                ? 'bg-blue-500 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span>单条处理</span>
+            </div>
+          </Link>
+          
+          <Link
+            to="/batch"
+            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
+              location.pathname === '/batch'
+                ? 'bg-blue-500 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z M8 4v4M16 4v4M4 11h16" />
+              </svg>
+              <span>批量处理</span>
+            </div>
+          </Link>
+
+          <Link
+            to="/credits"
+            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
+              location.pathname === '/credits'
+                ? 'bg-blue-500 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>致谢</span>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+}
 
 function App() {
   // 从 localStorage 初始化数据列表状态
@@ -238,7 +300,7 @@ function App() {
     });
   };
 
-  // 添加当前表��数据到列表
+  // 添加当前表数据到列表
   const addToDataList = () => {
     if (!formData.instruction || !formData.output) {
       alert('请填写必填项：指令和输出');
@@ -549,22 +611,7 @@ function App() {
     <Router>
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
-          {/* 添加导航菜单 */}
-          <nav className="mb-8 flex justify-center space-x-4">
-            <Link
-              to="/"
-              className="px-4 py-2 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
-            >
-              单条生成模式
-            </Link>
-            <Link
-              to="/batch"
-              className="px-4 py-2 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
-            >
-              批量自动化生成模式
-            </Link>
-          </nav>
-
+          <Navigation />
           <Routes>
             <Route path="/batch" element={
               <BatchProcessor 
@@ -572,12 +619,16 @@ function App() {
                 generateAIResponse={generateAIResponse}
               />
             } />
+            <Route path="/credits" element={<Credits />} />
             <Route path="/" element={
               <div className="bg-white rounded-lg shadow-lg p-8">
                 <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
-                  大模型训练数据生成助手
+                  捕获月球大模型合成数据平台
+                 
                 </h1>
                 
+                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm" style={{ textAlign: 'center' }}>致力于打造低成本的人人都懂用的多模态合成数据解决方案<br/>助力各类大模型的预训练、微调、o1、function calling、agent等训练场景,欢迎加入我们或与我们合作！</div>
+
                 {/* 添加导航链接 */}
                 <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm">
                   <a
@@ -781,7 +832,7 @@ function App() {
                           <textarea
                             value={item[1]}
                             onChange={(e) => handleHistoryChange(index, 'response', e.target.value)}
-                            placeholder="例如：好的，我来补充一些AI应用案例。在医疗领域，AI被用于..."
+                            placeholder="例如：好的，我来补充一些AI应用案例。在医领域，AI被用于..."
                             className="flex-1 h-24 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                           <button
@@ -912,7 +963,7 @@ function App() {
                       )}
                     </div>
 
-                    {/* 添��提示信息 */}
+                    {/* 添加提示信息 */}
                     <div className="mt-4 text-sm text-gray-500 text-center">
                       数据已自动保存到本地存储
                     </div>
