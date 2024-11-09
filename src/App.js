@@ -4,6 +4,9 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import mammoth from 'mammoth';
 // 导入默认配置
 import defaultConfig from './config';
+// 在文件顶部添加路由相关的导入
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import BatchProcessor from './components/BatchProcessor';
 
 // 设置pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -235,7 +238,7 @@ function App() {
     });
   };
 
-  // 添加当前表单数据到列表
+  // 添加当前表��数据到列表
   const addToDataList = () => {
     if (!formData.instruction || !formData.output) {
       alert('请填写必填项：指令和输出');
@@ -348,13 +351,12 @@ function App() {
     return await file.text();
   };
 
-  // 修改 generateAIResponse 函数
+  // 修改 generateAIResponse 函数，使其返回解析后的数据
   const generateAIResponse = async (content) => {
     try {
       setIsLoading(true);
       
-      // 确保有有效的模型名称
-      const modelName = config.model || 'deepseek-chat'; // 使用默认值作为后备
+      const modelName = config.model || 'deepseek-chat';
 
       const response = await fetch(`${config.baseUrl}`, {
         method: 'POST',
@@ -363,7 +365,7 @@ function App() {
           'Authorization': `Bearer ${config.apiKey}`
         },
         body: JSON.stringify({
-          model: modelName, // 使用确定的模型名称
+          model: modelName,
           max_tokens: 4096,
           messages: [
             {
@@ -396,92 +398,72 @@ function App() {
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
-
+      
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const aiResponse = data.choices[0].message.content;
-        try {
-          // 改进的 JSON 提取逻辑
-          let jsonContent;
-          
-          // 尝试多种可能的格式
-          const patterns = [
-            /```json\s*(\[[\s\S]*?\])\s*```/, // Markdown 代码块格式
-            /```\s*(\[[\s\S]*?\])\s*```/,     // 普通代码块格式
-            /(\[[\s\S]*?\])/                   // 纯 JSON 数组格式
-          ];
+        
+        // 解析JSON响应
+        let jsonContent;
+        const patterns = [
+          /```json\s*(\[[\s\S]*?\])\s*```/,
+          /```\s*(\[[\s\S]*?\])\s*```/,
+          /(\[[\s\S]*?\])/
+        ];
 
-          for (const pattern of patterns) {
-            const match = aiResponse.match(pattern);
-            if (match) {
-              try {
-                const extracted = match[1].trim();
-                // 尝试解析提取的内容
-                const parsed = JSON.parse(extracted);
-                if (Array.isArray(parsed)) {
-                  jsonContent = parsed;
-                  break;
-                }
-              } catch (e) {
-                console.log('当前模式解析失败，尝试下一个模式');
-              }
-            }
-          }
-
-          // 如果所有模式都失败，尝试直接解析整个响应
-          if (!jsonContent) {
+        for (const pattern of patterns) {
+          const match = aiResponse.match(pattern);
+          if (match) {
             try {
-              const parsed = JSON.parse(aiResponse);
+              const extracted = match[1].trim();
+              const parsed = JSON.parse(extracted);
               if (Array.isArray(parsed)) {
                 jsonContent = parsed;
+                break;
               }
             } catch (e) {
-              console.log('直接解析失败');
+              console.log('当前模式解析失败，尝试下一个模式');
             }
           }
-
-          if (jsonContent && Array.isArray(jsonContent)) {
-            // 验证和清理每个数据项
-            const cleanedResponses = jsonContent.map(item => ({
-              instruction: (item.instruction || '').trim(),
-              input: (item.input || '').trim(),
-              output: (item.output || '').trim(),
-              system: (item.system || '').trim(),
-              history: Array.isArray(item.history) ? item.history.map(([q, a]) => [
-                (q || '').trim(),
-                (a || '').trim()
-              ]) : [['', '']]
-            })).filter(item => item.instruction && item.output); // 只保留有必填字段的数据
-
-            if (cleanedResponses.length > 0) {
-              setAiSuggestions(cleanedResponses);
-              setCurrentSuggestionIndex(0);
-              setFormData(cleanedResponses[0]);
-              setError(null);
-            } else {
-              throw new Error('没有找到有效的训练数据');
-            }
-          } else {
-            throw new Error('未能提取有效的 JSON 数组');
-          }
-        } catch (parseError) {
-          console.error('JSON 处理失败:', parseError);
-          setError(`数据处理失败: ${parseError.message}`);
-          // 将原始应显示在输出中，方便调试
-          setFormData({
-            instruction: '解析原始响应',
-            input: content,
-            output: aiResponse,
-            system: '',
-            history: [['', '']]
-          });
         }
-      } else {
-        throw new Error('API 响应格式不正确');
+
+        if (!jsonContent) {
+          try {
+            const parsed = JSON.parse(aiResponse);
+            if (Array.isArray(parsed)) {
+              jsonContent = parsed;
+            }
+          } catch (e) {
+            console.log('直接解析失败');
+          }
+        }
+
+        if (jsonContent && Array.isArray(jsonContent)) {
+          const cleanedResponses = jsonContent.map(item => ({
+            instruction: (item.instruction || '').trim(),
+            input: (item.input || '').trim(),
+            output: (item.output || '').trim(),
+            system: (item.system || '').trim(),
+            history: Array.isArray(item.history) ? item.history.map(([q, a]) => [
+              (q || '').trim(),
+              (a || '').trim()
+            ]) : [['', '']]
+          })).filter(item => item.instruction && item.output);
+
+          if (cleanedResponses.length > 0) {
+            setAiSuggestions(cleanedResponses);
+            setCurrentSuggestionIndex(0);
+            setFormData(cleanedResponses[0]);
+            setError(null);
+            return cleanedResponses; // 返回处理后的数据
+          }
+        }
+        throw new Error('未能提取有效的训练数据');
       }
+      throw new Error('API 响应格式不正确');
     } catch (err) {
       console.error('API 调用错误:', err);
       setError(`AI响应生成失败: ${err.message}`);
+      throw err; // 向上传递错误
     } finally {
       setIsLoading(false);
     }
@@ -564,356 +546,384 @@ function App() {
   };
 
   return (
-    <div className="p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
-            大模型训练数据生成助手
-          </h1>
-          
-          {/* 添加导航链接 */}
-          <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm">
-            <a
-              href="https://github.com/zjrwtx/SFT-data-builder"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+    <Router>
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* 添加导航菜单 */}
+          <nav className="mb-8 flex justify-center space-x-4">
+            <Link
+              to="/"
+              className="px-4 py-2 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-              </svg>
-              <span>GitHub</span>
-            </a>
-
-            <a
-              href="https://mp.weixin.qq.com/s/ybihzjCJCL18uS_pYXpkcA"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+              单条生成模式
+            </Link>
+            <Link
+              to="/batch"
+              className="px-4 py-2 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229 .826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.018-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
-              </svg>
-              <span>公众号：正经人王同学</span>
-            </a>
+              批量自动化生成模式
+            </Link>
+          </nav>
 
-            <a
-              href="mailto:3038880699@qq.com"
-              className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span>联系作者：微信：whatisallineed</span>
-            </a>
-
-            <div className="flex items-center gap-1 text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>Version 1.0.0</span>
-            </div>
-          </div>
-
-          {/* 保持原有的 ConfigurationForm 和其他组件 */}
-          <ConfigurationForm />
-
-          {/* 添加文件上传区域 */}
-          <div className="mb-8">
-            <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                  </svg>
-                  <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">点击上传</span> 或拖拽文件到这里
-                  </p>
-                  <p className="text-xs text-gray-500">支持 PDF、DOCX、TXT 文件</p>
-                </div>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.docx,.txt"
-                  onChange={handleFileUpload}
-                />
-              </label>
-            </div>
-            {isLoading && (
-              <div className="mt-4 text-center text-gray-600">
-                正在处理文件...
-              </div>
-            )}
-            {error && (
-              <div className="mt-4 text-center text-red-500">
-                {error}
-              </div>
-            )}
-          </div>
-
-          {/* 在文件上传区域后添加文章链接输入区 */}
-          <div className="mb-8">
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={articleUrl}
-                onChange={(e) => setArticleUrl(e.target.value)}
-                placeholder="输入文章链接，如: https://mp.weixin.qq.com/s/xxx"
-                className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          <Routes>
+            <Route path="/batch" element={
+              <BatchProcessor 
+                config={config}
+                generateAIResponse={generateAIResponse}
               />
-              <button
-                onClick={handleArticleUrlSubmit}
-                disabled={!articleUrl || isLoading}
-                className={`px-6 py-2 rounded-md text-white ${
-                  !articleUrl || isLoading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-500 hover:bg-blue-600'
-                }`}
-              >
-                提取文章
-              </button>
-            </div>
-            <p className="mt-2 text-sm text-gray-500">
-              支持微信公众号文章等网页链接
-            </p>
-          </div>
+            } />
+            <Route path="/" element={
+              <div className="bg-white rounded-lg shadow-lg p-8">
+                <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
+                  大模型训练数据生成助手
+                </h1>
+                
+                {/* 添加导航链接 */}
+                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm">
+                  <a
+                    href="https://github.com/zjrwtx/SFT-data-builder"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                    </svg>
+                    <span>GitHub</span>
+                  </a>
 
-          {/* 或者直接输入文本 */}
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              直接输入本:
-            </label>
-            <textarea
-              value={fileContent}
-              onChange={(e) => setFileContent(e.target.value)}
-              className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="在此输入文本内容..."
-            />
-            <button
-              onClick={() => generateAIResponse(fileContent)}
-              disabled={!fileContent || isLoading}
-              className={`mt-2 px-4 py-2 rounded-md text-white ${
-                !fileContent || isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              }`}
-            >
-              生成AI响应
-            </button>
-          </div>
+                  <a
+                    href="https://mp.weixin.qq.com/s/ybihzjCJCL18uS_pYXpkcA"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229 .826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.018-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
+                    </svg>
+                    <span>公众号：正经人王同学</span>
+                  </a>
 
-          <div className="space-y-4 mt-6">
-            {aiSuggestions.length > 0 && <SuggestionNavigation />}
-            <div className="space-y-6">
-              {/* 表单字段 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  指令 (必填):
-                </label>
-                <textarea
-                  value={formData.instruction}
-                  onChange={(e) => handleInputChange(e, 'instruction')}
-                  placeholder="例如：请帮我写一篇关于人工智能的文章，要求800字左右。"
-                  className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+                  <a
+                    href="mailto:3038880699@qq.com"
+                    className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>联系作者：微信：whatisallineed</span>
+                  </a>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  输入 (选填):
-                </label>
-                <textarea
-                  value={formData.input}
-                  onChange={(e) => handleInputChange(e, 'input')}
-                  placeholder="例如：文章需要包含以下关键点：1. AI的定义 2. AI的应用领域 3. AI的未来发展"
-                  className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  输出 (必填):
-                </label>
-                <textarea
-                  value={formData.output}
-                  onChange={(e) => handleInputChange(e, 'output')}
-                  placeholder="例如：人工智能（AI）是一门致力于研究和开发能够模拟、延伸和扩展人类智能的计算机科学领域...（此处是一篇完整的800字文章）"
-                  className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  系统提示词 (选填):
-                </label>
-                <textarea
-                  value={formData.system}
-                  onChange={(e) => handleInputChange(e, 'system')}
-                  placeholder="例如：你是一位专业的文章写作助手，擅长创作各类主题的文章。你会根据用户的要求，写出结构清晰、内容丰富的文章。"
-                  className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    历史对话 (选填)
-                  </h2>
-                  <span className="text-sm text-gray-500">
-                    于记录之前的对话内容
-                  </span>
+                  <div className="flex items-center gap-1 text-gray-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Version 1.0.0</span>
+                  </div>
                 </div>
-                {formData.history.map((item, index) => (
-                  <div key={index} className="flex gap-4 items-start">
-                    <textarea
-                      value={item[0]}
-                      onChange={(e) => handleHistoryChange(index, 'instruction', e.target.value)}
-                      placeholder="例如：这篇文章能否加入一些具体的AI应用案例？"
-                      className="flex-1 h-24 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <textarea
-                      value={item[1]}
-                      onChange={(e) => handleHistoryChange(index, 'response', e.target.value)}
-                      placeholder="例如：好的，我来补充一些AI应用案例。在医疗领域，AI被用于..."
-                      className="flex-1 h-24 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+
+                {/* 保持原有的 ConfigurationForm 和其他组件 */}
+                <ConfigurationForm />
+
+                {/* 添加文件上传区域 */}
+                <div className="mb-8">
+                  <div className="flex items-center justify-center w-full">
+                    <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">点击上传</span> 或拖拽文件到这里
+                        </p>
+                        <p className="text-xs text-gray-500">支持 PDF、DOCX、TXT 文件</p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.docx,.txt"
+                        onChange={handleFileUpload}
+                      />
+                    </label>
+                  </div>
+                  {isLoading && (
+                    <div className="mt-4 text-center text-gray-600">
+                      正在处理文件...
+                    </div>
+                  )}
+                  {error && (
+                    <div className="mt-4 text-center text-red-500">
+                      {error}
+                    </div>
+                  )}
+                </div>
+
+                {/* 在文件上传区域后添加文章链接输入区 */}
+                <div className="mb-8">
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      value={articleUrl}
+                      onChange={(e) => setArticleUrl(e.target.value)}
+                      placeholder="输入文章链接，如: https://mp.weixin.qq.com/s/xxx"
+                      className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <button
-                      onClick={() => removeHistoryRow(index)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                      onClick={handleArticleUrlSubmit}
+                      disabled={!articleUrl || isLoading}
+                      className={`px-6 py-2 rounded-md text-white ${
+                        !articleUrl || isLoading
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-blue-500 hover:bg-blue-600'
+                      }`}
                     >
-                      删除
+                      提取文章
                     </button>
                   </div>
-                ))}
-                <button
-                  onClick={addHistoryRow}
-                  className="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-                >
-                  添加历史对话行
-                </button>
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  onClick={addToDataList}
-                  className="flex-1 px-6 py-3 bg-green-500 text-white font-medium rounded-md hover:bg-green-600 transition-colors"
-                >
-                  添加到数据列表
-                </button>
-                <button
-                  onClick={resetForm}
-                  className="px-6 py-3 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 transition-colors"
-                >
-                  清空表单
-                </button>
-              </div>
-
-              {/* 显示已添加的数据数量 */}
-              {dataList.length > 0 && (
-                <div className="text-center text-gray-600">
-                  已添加 {dataList.length} 条数据
+                  <p className="mt-2 text-sm text-gray-500">
+                    支持微信公众号文章等网页链接
+                  </p>
                 </div>
-              )}
 
-              {/* 在下载按钮之前添加数据预览区域 */}
-              {dataList.length > 0 && (
-                <div className="mt-8 border-t pt-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      已生成的数据 ({dataList.length}条)
-                    </h2>
-                  </div>
-                  
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {dataList.map((data, index) => (
-                      <div key={index} className="border rounded-lg p-4 bg-gray-50 relative">
-                        <button
-                          onClick={() => removeFromDataList(index)}
-                          className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                          title="删除此条数据"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        </button>
+                {/* 或者直接输入文本 */}
+                <div className="mb-8">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    直接输入本:
+                  </label>
+                  <textarea
+                    value={fileContent}
+                    onChange={(e) => setFileContent(e.target.value)}
+                    className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="在此输入文本内容..."
+                  />
+                  <button
+                    onClick={() => generateAIResponse(fileContent)}
+                    disabled={!fileContent || isLoading}
+                    className={`mt-2 px-4 py-2 rounded-md text-white ${
+                      !fileContent || isLoading
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-blue-500 hover:bg-blue-600'
+                    }`}
+                  >
+                    生成AI响应
+                  </button>
+                </div>
+
+                <div className="space-y-4 mt-6">
+                  {aiSuggestions.length > 0 && <SuggestionNavigation />}
+                  <div className="space-y-6">
+                    {/* 表单字段 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        指令 (必填):
+                      </label>
+                      <textarea
+                        value={formData.instruction}
+                        onChange={(e) => handleInputChange(e, 'instruction')}
+                        placeholder="例如：请帮我写一篇关于人工智能的文章，要求800字左右。"
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        输入 (选填):
+                      </label>
+                      <textarea
+                        value={formData.input}
+                        onChange={(e) => handleInputChange(e, 'input')}
+                        placeholder="例如：文章需要包含以下关键点：1. AI的定义 2. AI的应用领域 3. AI的未来发展"
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        输出 (必填):
+                      </label>
+                      <textarea
+                        value={formData.output}
+                        onChange={(e) => handleInputChange(e, 'output')}
+                        placeholder="例如：人工智能（AI）是一门致力于研究和开发能够模拟、延伸和扩展人类智能的计算机科学领域...（此处是一篇完整的800字文章）"
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        系统提示词 (选填):
+                      </label>
+                      <textarea
+                        value={formData.system}
+                        onChange={(e) => handleInputChange(e, 'system')}
+                        placeholder="例如：你是一位专业的文章写作助手，擅长创作各类主题的文章。你会根据用户的要求，写出结构清晰、内容丰富的文章。"
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-gray-800">
+                          历史对话 (选填)
+                        </h2>
+                        <span className="text-sm text-gray-500">
+                          于记录之前的对话内容
+                        </span>
+                      </div>
+                      {formData.history.map((item, index) => (
+                        <div key={index} className="flex gap-4 items-start">
+                          <textarea
+                            value={item[0]}
+                            onChange={(e) => handleHistoryChange(index, 'instruction', e.target.value)}
+                            placeholder="例如：这篇文章能否加入一些具体的AI应用案例？"
+                            className="flex-1 h-24 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                          <textarea
+                            value={item[1]}
+                            onChange={(e) => handleHistoryChange(index, 'response', e.target.value)}
+                            placeholder="例如：好的，我来补充一些AI应用案例。在医疗领域，AI被用于..."
+                            className="flex-1 h-24 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                          <button
+                            onClick={() => removeHistoryRow(index)}
+                            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                          >
+                            删除
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={addHistoryRow}
+                        className="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                      >
+                        添加历史对话行
+                      </button>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <button
+                        onClick={addToDataList}
+                        className="flex-1 px-6 py-3 bg-green-500 text-white font-medium rounded-md hover:bg-green-600 transition-colors"
+                      >
+                        添加到数据列表
+                      </button>
+                      <button
+                        onClick={resetForm}
+                        className="px-6 py-3 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 transition-colors"
+                      >
+                        清空表单
+                      </button>
+                    </div>
+
+                    {/* 显示已添加的数据数量 */}
+                    {dataList.length > 0 && (
+                      <div className="text-center text-gray-600">
+                        已添加 {dataList.length} 条数据
+                      </div>
+                    )}
+
+                    {/* 在下载按钮之前添加数据预览区域 */}
+                    {dataList.length > 0 && (
+                      <div className="mt-8 border-t pt-8">
+                        <div className="flex justify-between items-center mb-4">
+                          <h2 className="text-xl font-semibold text-gray-800">
+                            已生成的数据 ({dataList.length}条)
+                          </h2>
+                        </div>
                         
-                        <div className="grid gap-2">
-                          <div>
-                            <span className="font-semibold">指令:</span>
-                            <p className="ml-4 text-gray-700">{data.instruction}</p>
-                          </div>
-                          
-                          {data.input && (
-                            <div>
-                              <span className="font-semibold">输入:</span>
-                              <p className="ml-4 text-gray-700">{data.input}</p>
-                            </div>
-                          )}
-                          
-                          <div>
-                            <span className="font-semibold">输出:</span>
-                            <p className="ml-4 text-gray-700">{data.output}</p>
-                          </div>
-                          
-                          {data.system && (
-                            <div>
-                              <span className="font-semibold">系统提示词:</span>
-                              <p className="ml-4 text-gray-700">{data.system}</p>
-                            </div>
-                          )}
-                          
-                          {data.history.length > 0 && data.history[0][0] && (
-                            <div>
-                              <span className="font-semibold">历史对话:</span>
-                              <div className="ml-4">
-                                {data.history.map((item, idx) => (
-                                  <div key={idx} className="mb-2">
-                                    <p className="text-gray-700">问: {item[0]}</p>
-                                    <p className="text-gray-700">答: {item[1]}</p>
+                        <div className="space-y-4 max-h-96 overflow-y-auto">
+                          {dataList.map((data, index) => (
+                            <div key={index} className="border rounded-lg p-4 bg-gray-50 relative">
+                              <button
+                                onClick={() => removeFromDataList(index)}
+                                className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                title="删除此条数据"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                              
+                              <div className="grid gap-2">
+                                <div>
+                                  <span className="font-semibold">指令:</span>
+                                  <p className="ml-4 text-gray-700">{data.instruction}</p>
+                                </div>
+                                
+                                {data.input && (
+                                  <div>
+                                    <span className="font-semibold">输入:</span>
+                                    <p className="ml-4 text-gray-700">{data.input}</p>
                                   </div>
-                                ))}
+                                )}
+                                
+                                <div>
+                                  <span className="font-semibold">输出:</span>
+                                  <p className="ml-4 text-gray-700">{data.output}</p>
+                                </div>
+                                
+                                {data.system && (
+                                  <div>
+                                    <span className="font-semibold">系统提示词:</span>
+                                    <p className="ml-4 text-gray-700">{data.system}</p>
+                                  </div>
+                                )}
+                                
+                                {data.history.length > 0 && data.history[0][0] && (
+                                  <div>
+                                    <span className="font-semibold">历史对话:</span>
+                                    <div className="ml-4">
+                                      {data.history.map((item, idx) => (
+                                        <div key={idx} className="mb-2">
+                                          <p className="text-gray-700">问: {item[0]}</p>
+                                          <p className="text-gray-700">答: {item[1]}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                          )}
+                          ))}
                         </div>
                       </div>
-                    ))}
+                    )}
+
+                    <div className="mt-6 flex gap-4">
+                      <button
+                        onClick={downloadJSON}
+                        disabled={dataList.length === 0}
+                        className={`flex-1 px-6 py-3 text-white font-medium rounded-md transition-colors ${
+                          dataList.length === 0 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-blue-500 hover:bg-blue-600'
+                        }`}
+                      >
+                        下载JSON文件 ({dataList.length}条)
+                      </button>
+                      
+                      {dataList.length > 0 && (
+                        <button
+                          onClick={clearAllData}
+                          className="px-6 py-3 bg-red-500 text-white font-medium rounded-md hover:bg-red-600 transition-colors"
+                        >
+                          清空所有数据
+                        </button>
+                      )}
+                    </div>
+
+                    {/* 添��提示信息 */}
+                    <div className="mt-4 text-sm text-gray-500 text-center">
+                      数据已自动保存到本地存储
+                    </div>
                   </div>
                 </div>
-              )}
-
-              <div className="mt-6 flex gap-4">
-                <button
-                  onClick={downloadJSON}
-                  disabled={dataList.length === 0}
-                  className={`flex-1 px-6 py-3 text-white font-medium rounded-md transition-colors ${
-                    dataList.length === 0 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-500 hover:bg-blue-600'
-                  }`}
-                >
-                  下载JSON文件 ({dataList.length}条)
-                </button>
-                
-                {dataList.length > 0 && (
-                  <button
-                    onClick={clearAllData}
-                    className="px-6 py-3 bg-red-500 text-white font-medium rounded-md hover:bg-red-600 transition-colors"
-                  >
-                    清空所有数据
-                  </button>
-                )}
               </div>
-
-              {/* 添加提示信息 */}
-              <div className="mt-4 text-sm text-gray-500 text-center">
-                数据已自动保存到本地存储
-              </div>
-            </div>
-          </div>
+            } />
+          </Routes>
         </div>
       </div>
-    </div>
+    </Router>
   );
 }
 
