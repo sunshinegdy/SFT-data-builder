@@ -7,8 +7,11 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
-<img width="861" alt="bf43020b4c9c7618d0f1fd155043628" src="https://github.com/user-attachments/assets/f058ca25-671f-4d94-a560-5cf2a59d119f">
-<img width="861" alt="90596b8a0362662f8cf70ff8af16db5" src="https://github.com/user-attachments/assets/ab87518f-fea2-4b92-997a-780deb4bc26a">
+
+<img width="861" alt="a03d915893cfcec4a2ff76e8cf93fbb" src="https://github.com/user-attachments/assets/1fa622c1-3539-41fe-91a9-8d903ae013a8">
+<img width="861" alt="cfb9e2c681df09534217d12fc79c1c3" src="https://github.com/user-attachments/assets/7e235e69-2dd1-4ee3-b9c6-7e7a6e1fc317">
+
+
 <img width="861" alt="1fb4e0bc5e6c94936a07184aec76ed6" src="https://github.com/user-attachments/assets/3a152963-d32f-4101-90a4-74e9b20ea1ea">
 <img width="861" alt="63303795320f7f0f2410b405a367704" src="https://github.com/user-attachments/assets/eba5efed-39af-42ac-9288-c7a36c1c8377">
 
@@ -25,6 +28,7 @@
 - 🔄 **批量生成**：一次生成多条不同角度的训练数据、支持批量url文章自动生成批量数据
 - 📝 **灵活编辑**：所有生成的数据都可以随时编辑和调整
 - 💾 **本地存储**：自动保存所有数据到本地
+- 🔌 **上传合成数据到huggingface平台**：填好accesstoken和仓库等信息后 一键上传合成好的数据到huggingface平台存储或分享给他人
 - 📤 **导出简单**：一键导出标准格式JSON文件
 - 🎨 **优雅界面**：简洁直观的用户界面，操作便捷
 - 🔌 **多模型支持**：支持多种主流AI模型，可自定义模型
@@ -32,6 +36,9 @@
 - 📚 **主流训练格式互换**：增加了 Alpaca训练格式与Openai训练格式互换功能 支持批量文件互换格式
 
 ## 📅 更新动态
+
+### v1.1.2 (2024-11-20)
+- ✨ 增加了上传合成数据到huggingface平台：填好accesstoken和仓库等信息后 一键上传合成好的数据到huggingface平台存储或分享给他人
 
 ### v1.1.1 (2024-11-12)
 - ✨ 增加了 Alpaca训练格式与Openai训练格式互换功能 支持批量文件互换格式
