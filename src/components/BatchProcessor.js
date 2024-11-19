@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import HuggingFaceUploader from './HuggingFaceUploader';
 
 function BatchProcessor({ config, generateAIResponse }) {
   const [urls, setUrls] = useState('');
@@ -225,6 +226,13 @@ function BatchProcessor({ config, generateAIResponse }) {
               ))}
             </div>
           </div>
+        )}
+
+        {generatedData.length > 0 && (
+          <HuggingFaceUploader 
+            data={generatedData}
+            fileName={`training-data-${new Date().toISOString().slice(0, 10)}.json`}
+          />
         )}
       </div>
     </div>

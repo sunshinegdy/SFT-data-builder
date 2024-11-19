@@ -1305,6 +1305,18 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.57.0.tgz"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
+"@huggingface/hub@^0.21.0":
+  version "0.21.0"
+  resolved "https://registry.npmmirror.com/@huggingface/hub/-/hub-0.21.0.tgz#a4193fd51a1c995fc66a6b76f36fab247c6b1b8a"
+  integrity sha512-DpitNhqobMJLTv8dUq/EMtrz1dpfs3UrSVCxe1aKpjLAdOs6Gm6rqrinUFNvC9G88RIRzIYzojUtYUqlkKwKnA==
+  dependencies:
+    "@huggingface/tasks" "^0.13.3"
+
+"@huggingface/tasks@^0.13.3":
+  version "0.13.4"
+  resolved "https://registry.npmmirror.com/@huggingface/tasks/-/tasks-0.13.4.tgz#9ae1650d4061f70a02468aae32f01f80ed47dd97"
+  integrity sha512-LETHbMSK3gHBFU0D09ziEJm6t1Pcgii4SFwHw+d+8MFGfkAryxaDl2qaHY+PxiTkZEeaTLd6G8/239SJuVxyWg==
+
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
   resolved "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.14.tgz"
