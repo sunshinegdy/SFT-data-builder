@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import BatchProcessor from './components/BatchProcessor';
 import Credits from './components/Credits';
 import FormatConverter from './components/transfertools';
+import HuggingFaceUploader from './components/HuggingFaceUploader';
 
 // 设置pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -348,7 +349,7 @@ function App() {
     resetForm();
   };
 
-  // ���载JSON文件
+  // 载JSON文件
   const downloadJSON = () => {
     try {
       if (dataList.length === 0) {
@@ -829,7 +830,7 @@ function App() {
                       <textarea
                         value={formData.system}
                         onChange={(e) => handleInputChange(e, 'system')}
-                        placeholder="例如：你是一位专业的文章写作助手，擅长创作各类主题的文章。你会根据用户的要求，写出结构清晰、内容丰富的文章。"
+                        placeholder="例如：你是一位专业的文章写���助手，擅长创作各类主题的文章。你会根据用户的要求，写出结构清晰、内容丰富的文章。"
                         className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -991,6 +992,13 @@ function App() {
                     </div>
                   </div>
                 </div>
+
+                {dataList.length > 0 && (
+                  <HuggingFaceUploader 
+                    data={dataList}
+                    fileName={`training-data-${new Date().toISOString().slice(0, 10)}.json`}
+                  />
+                )}
               </div>
             } />
           </Routes>
