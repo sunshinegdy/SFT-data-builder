@@ -11,7 +11,7 @@ const ImageDatasetGenerator = ({ config }) => {
   const [renamedImages, setRenamedImages] = useState([]);
   const fileInputRef = useRef(null);
 
-  const vl_apiKey = "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";
+  const vl_apiKey = "";
 
   // 在文件顶部添加一个函数来获取图片的相对路径或文件名
   const getImageLocalPath = (imageInfo) => {
