@@ -99,12 +99,7 @@ function Navigation() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <span>CoT 生成器</span>
-            </div>
+          
           </Link>
         </div>
       </div>
@@ -740,7 +735,7 @@ function App() {
                  
                 </h1>
                 
-                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm" style={{ textAlign: 'center' }}>致力于打造低成本的人人都懂用的多模态合成数据解决方案<br/>助力各类大模型的预训练、微调、o1、function calling、agent等训练场景,欢迎加入我们或与我们合作！</div>
+                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm" style={{ textAlign: 'center' }}>致力于打造低成本的人人都懂用的多模态合成数据解决方案<br/>助力各类大模型的预训练、微调、gpto1(cot)、function calling等训练场景,欢迎加入我们或与我们合作！</div>
 
                 {/* 添加导航链接 */}
                 <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm">
