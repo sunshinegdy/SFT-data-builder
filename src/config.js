@@ -1,7 +1,7 @@
 const defaultConfig = {
   baseUrl: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
   apiKey: '',
-  vl_apiKey: 'sk-9001e438e67c4d6190b8d107755d0ebd',
+  vl_apiKey: '',
   suggestionsCount: 3,
   model: 'glm-4-flash',
   modelOptions: [
