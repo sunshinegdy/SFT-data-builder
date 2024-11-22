@@ -736,7 +736,7 @@ function App() {
             <Route path="/" element={
               <div className="bg-white rounded-lg shadow-lg p-8">
                 <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
-                  捕获月球大模型合成数据平台
+                  捕获月球多模态合成数据平台
                  
                 </h1>
                 

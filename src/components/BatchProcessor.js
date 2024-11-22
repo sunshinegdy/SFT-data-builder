@@ -105,7 +105,7 @@ function BatchProcessor({ config, generateAIResponse }) {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          批量URL自动合成数据模式：捕获月球大模型合成数据平台
+          批量URL自动合成数据模式：捕获月球多模态合成数据平台
         </h1>
 
         <div className="mb-6">
