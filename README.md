@@ -1,5 +1,5 @@
 # 🤖 捕获月球大模型合成数据平台-公众号：正经人王同学
-### 捕获月球大模型合成数据平台：致力于打造低成本的人人都懂用的多模态合成数据解决方案助力各类大模型的预训练、微调、o1、function calling、agent等训练场景,欢迎加入我们或与我们合作！
+### 捕获月球大模型合成数据平台：致力于打造低成本的人人都懂用的多模态合成数据解决方案助力各类大模型的预训练、微调、gpto1(cot)、function calling等训练场景,欢迎加入我们或与我们合作！
 
 在线体验地址：https://sft-data-builder.vercel.app
 演示视频：[https://www.bilibili.com/video/BV1dvDQYBEew/?spm_id_from=333.999.0.0](https://www.bilibili.com/video/BV19qD6YqEJ2/?spm_id_from=333.999.0.0)
@@ -7,9 +7,14 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
+<img width="861" alt="8d5400bce0635b5e236cba05e923c44" src="https://github.com/user-attachments/assets/531dee7e-949f-4fac-b646-06ab518f5612">
+<img width="954" alt="d5445bacd9f03810e326039f9653267" src="https://github.com/user-attachments/assets/8e49cc36-b5aa-419f-a748-141b94a27161">
+<img width="954" alt="4570df76058f5bd3e996b4f6bdba9db" src="https://github.com/user-attachments/assets/a353a4ed-77e3-4c63-9948-5f6caabab764">
+
 
 <img width="861" alt="a03d915893cfcec4a2ff76e8cf93fbb" src="https://github.com/user-attachments/assets/1fa622c1-3539-41fe-91a9-8d903ae013a8">
 <img width="861" alt="cfb9e2c681df09534217d12fc79c1c3" src="https://github.com/user-attachments/assets/7e235e69-2dd1-4ee3-b9c6-7e7a6e1fc317">
+![image](https://github.com/user-attachments/assets/c8c2ddf0-f3c6-4baf-9b81-ea21e7422ae9)
 
 
 <img width="861" alt="1fb4e0bc5e6c94936a07184aec76ed6" src="https://github.com/user-attachments/assets/3a152963-d32f-4101-90a4-74e9b20ea1ea">
@@ -25,6 +30,7 @@
 ## ✨ 特性
 
 - 🎯 **一键生成训练数据**：支持众多openai格式调用的本地或云端模型（包括GLM-4-Flash等免费调用模型） 将普通文本秒变高质量AI训练数据 支持直接从微信公众号文章等链接内容生成训练数据
+- 📝 **合成gpto1类的cot数据合成功能，且可同步上传至huggingface**
 - 🔄 **批量生成**：一次生成多条不同角度的训练数据、支持批量url文章自动生成批量数据
 - 📝 **灵活编辑**：所有生成的数据都可以随时编辑和调整
 - 💾 **本地存储**：自动保存所有数据到本地
@@ -36,6 +42,9 @@
 - 📚 **主流训练格式互换**：增加了 Alpaca训练格式与Openai训练格式互换功能 支持批量文件互换格式
 
 ## 📅 更新动态
+### v1.1.3 (2024-11-22)
+- ✨ 增加了合成gpto1类的cot数据合成功能，且可同步上传至huggingface
+
 
 ### v1.1.2 (2024-11-20)
 - ✨ 增加了上传合成数据到huggingface平台：填好accesstoken和仓库等信息后 一键上传合成好的数据到huggingface平台存储或分享给他人
