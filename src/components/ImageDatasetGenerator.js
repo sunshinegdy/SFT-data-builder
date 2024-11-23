@@ -11,7 +11,7 @@ const ImageDatasetGenerator = ({ config }) => {
   const [renamedImages, setRenamedImages] = useState([]);
   const fileInputRef = useRef(null);
 
-  const vl_apiKey = process.env.REACT_APP_LLM_API_KEY;
+  const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
 
   // 在文件顶部添加一个函数来获取图片的相对路径或文件名
   const getImageLocalPath = (imageInfo) => {
@@ -97,7 +97,7 @@ const ImageDatasetGenerator = ({ config }) => {
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
-              "Authorization": `Bearer ${vl_apiKey}`,
+              "Authorization": `Bearer ${apiKey}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -186,7 +186,7 @@ const ImageDatasetGenerator = ({ config }) => {
               const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${vl_apiKey}`,
+                  'Authorization': `Bearer ${apiKey}`,
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
