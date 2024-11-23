@@ -149,7 +149,7 @@ json
 ## 🙏 致谢
 特别感谢以下开源项目和贡献者：
 - [LaiWei魏来](https://github.com/waltonfuture) -提供算法指导等支持
-- @misc{HK-O1aw,
+ @misc{HK-O1aw,
   author = {HKAIR Lab},
   title = {HK-O1aw Models: Leveraging O1 Slow Thinking in the Development of Hong Kong Legal Large Language Models},
   year = {2024},
