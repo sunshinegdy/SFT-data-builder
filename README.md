@@ -149,7 +149,7 @@ json
 ## 🙏 致谢
 特别感谢以下开源项目和贡献者：
 - [LaiWei魏来](https://github.com/waltonfuture) -提供算法指导等支持
-- o1数据合成的参考来源 -https://github.com/HKAIR-Lab/HK-O1aw
+- gpto1(cot)数据合成的参考来源 -https://github.com/HKAIR-Lab/HK-O1aw
 - 所有提供反馈和建议的用户
   
 
