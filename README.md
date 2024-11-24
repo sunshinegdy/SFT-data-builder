@@ -7,6 +7,8 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
+![image](https://github.com/user-attachments/assets/ffd1f820-dd6f-4d11-8411-0c12d6ba76ce)
+
 <img width="861" alt="8d5400bce0635b5e236cba05e923c44" src="https://github.com/user-attachments/assets/531dee7e-949f-4fac-b646-06ab518f5612">
 <img width="861" alt="0972de00f8afa29489cba138ecac6ac" src="https://github.com/user-attachments/assets/90202679-5a01-48a2-b80d-e6f1a06f910e">
 
