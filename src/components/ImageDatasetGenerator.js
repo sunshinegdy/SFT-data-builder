@@ -311,7 +311,7 @@ const ImageDatasetGenerator = ({ config }) => {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          图片理解数据集生成器
+          图片理解数据集合成
         </h1>
 
         {/* 图片上传区域 */}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 // 添加文件解析库
 import { Document, Page, pdfjs } from 'react-pdf';
 import mammoth from 'mammoth';
+import { Analytics } from "@vercel/analytics/react"
 // 导入默认配置
 import defaultConfig from './config';
 // 在文件顶部添加路由相关的导入
@@ -12,112 +13,122 @@ import FormatConverter from './components/transfertools';
 import HuggingFaceUploader from './components/HuggingFaceUploader';
 import CotGenerator from './components/CotGenerator';
 import ImageDatasetGenerator from './components/ImageDatasetGenerator';
+import VideoDatasetGenerator from './components/VideoDatasetGenerator';
+import DatasetShare from './components/DatasetShare';
 
 // 设置pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-// 创建一个新的导航组件来使用 useLocation
+// 修改 Navigation 组件
 function Navigation() {
   const location = useLocation();
   
+  const navItems = [
+    {
+      path: '/',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      ),
+      label: '单条处理'
+    },
+    {
+      path: '/batch',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z M8 4v4M16 4v4M4 11h16" />
+        </svg>
+      ),
+      label: '批量处理'
+    },
+    {
+      path: '/transfer',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg>
+      ),
+      label: '格式转换'
+    },
+    {
+      path: '/image-dataset',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+      label: '图片数据集合成'
+    },
+    {
+      path: '/video-dataset',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      ),
+      label: '视频数据集合成（待开发）'
+    },
+    {
+      path: '/datasets',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      ),
+      label: '合成数据集分享（待开发）'
+    }
+  ];
+
   return (
-    <nav className="mb-8">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="flex flex-wrap justify-center items-center p-4 gap-2">
-          <Link
-            to="/"
-            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-              location.pathname === '/'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <span>单条处理</span>
-            </div>
-          </Link>
+    <nav className="sticky top-0 z-50 bg-white shadow-md">
+      <div className="max-w-7xl mx-auto">
+        {/* Logo and Brand */}
+        <div className="flex items-center justify-between px-4 py-2 border-b">
+          <div className="flex items-center space-x-2">
+            <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span className="text-xl font-bold text-gray-800">捕获月球多模态合成数据平台</span>
+          </div>
           
-          <Link
-            to="/batch"
-            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-              location.pathname === '/batch'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z M8 4v4M16 4v4M4 11h16" />
+          {/* User Profile or Additional Actions */}
+          <div className="flex items-center space-x-4">
+            <a
+              href="https://github.com/zjrwtx/SFT-data-builder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
               </svg>
-              <span>批量处理</span>
-            </div>
-          </Link>
-     
+            </a>
+          </div>
+        </div>
 
-        
-
-          <Link
-            to="/transfer"
-            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-              location.pathname === '/transfer'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-              <span>格式转换</span>
-            </div>
-          </Link>
-
-
-          <Link
-            to="/credits"
-            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-              location.pathname === '/credits'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>致谢</span>
-            </div>
-          </Link>
-
-          <Link
-            to="/cot"
-            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-              location.pathname === '/cot'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-          
-          </Link>
-
-          <Link
-            to="/image-dataset"
-            className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-              location.pathname === '/image-dataset'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>图片数据集</span>
-            </div>
-          </Link>
+        {/* Navigation Links */}
+        <div className="px-4 py-2">
+          <div className="flex items-center space-x-1 overflow-x-auto">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center px-4 py-2 rounded-full transition-colors duration-200 whitespace-nowrap ${
+                  location.pathname === item.path
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span className={`${
+                  location.pathname === item.path ? 'text-blue-700' : 'text-gray-500'
+                }`}>
+                  {item.icon}
+                </span>
+                <span className="ml-2 text-sm font-medium">{item.label}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </nav>
@@ -706,7 +717,7 @@ function App() {
       const content = await response.text();
       setFileContent(content);
       
-      // 自动生成 AI 响应
+      // 自动成 AI 响应
       await generateAIResponse(content);
     } catch (err) {
       console.error('文章提取错误:', err);
@@ -732,9 +743,9 @@ function App() {
 
   return (
     <Router>
-      <div className="p-6">
-        <div className="max-w-4xl mx-auto">
-          <Navigation />
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <Routes>
             <Route path="/batch" element={
               <BatchProcessor 
@@ -746,14 +757,16 @@ function App() {
             <Route path="/transfer" element={<FormatConverter />} />
             <Route path="/cot" element={<CotGenerator config={config} />} />
             <Route path="/image-dataset" element={<ImageDatasetGenerator config={config} />} />
+            <Route path="/video-dataset" element={<VideoDatasetGenerator config={config} />} />
+            <Route path="/datasets" element={<DatasetShare />} />
             <Route path="/" element={
               <div className="bg-white rounded-lg shadow-lg p-8">
-                <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
+                {/* <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
                   捕获月球多模态合成数据平台
                  
-                </h1>
+                </h1> */}
                 
-                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm" style={{ textAlign: 'center' }}>致力于打造低成本的人人都懂用的多模态合成数据解决方案<br/>助力各类大模型的预训练、微调、gpto1(cot)、function calling等训练场景,欢迎加入我们或与我们合作！</div>
+                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm" style={{ textAlign: 'center' }}>致力于打造低成本的人人都懂用的多模态合成数据平台<br/>助力各类垂直行业大模型的微调（function calling、images、videos compresshension）、RLHF、gpto1(cot)等训练场景,欢迎加入我们或与我们合作！</div>
 
                 {/* 添加导航链接 */}
                 <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm">
@@ -780,6 +793,17 @@ function App() {
                     </svg>
                     <span>公众号：正经人王同学</span>
                   </a>
+                  <a
+                    href="https://x.com/zjrwtx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229 .826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.018-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
+                    </svg>
+                    <span>X推特：正经人王同学</span>
+                  </a>
 
                   <a
                     href="mailto:3038880699@qq.com"
@@ -795,7 +819,7 @@ function App() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <span>Version 1.0.0</span>
+                    <span>Version 1.0.3</span>
                   </div>
                 </div>
 
@@ -1038,7 +1062,7 @@ function App() {
                                 
                                 <div className="grid gap-2">
                                   {data.type === 'cot' ? (
-                                    // CoT 类型数据显示
+                                    // CoT 类型数据���示
                                     <>
                                       <div>
                                         <span className="font-semibold">标题:</span>
@@ -1059,7 +1083,7 @@ function App() {
                                     // 对话类型数据显示（原有的显示逻辑）
                                     <>
                                       <div>
-                                        <span className="font-semibold">指令:</span>
+                                        <span className="font-semibold">��令:</span>
                                         <p className="ml-4 text-gray-700">{data.instruction}</p>
                                       </div>
                                       {data.input && (
@@ -1163,7 +1187,7 @@ function App() {
                               setCotDataList(newList);
                             }}
                             className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                            title="删除此条数据"
+                            title="删除此条据"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
