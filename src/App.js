@@ -1178,6 +1178,7 @@ function App() {
                         />
                       </div>
                     </div>
+                    <Analytics/>
                     <div className="space-y-4 max-h-96 overflow-y-auto">
                       {cotDataList.map((data, index) => (
                         <div key={index} className="border rounded-lg p-4 bg-gray-50 relative">
