@@ -89,7 +89,7 @@ function Navigation() {
             <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <span className="text-xl font-bold text-gray-800">捕获月球</span>
+            <span className="text-xl font-bold text-gray-800">捕获月球多模态合成数据平台</span>
           </div>
           
           {/* User Profile or Additional Actions */}
@@ -761,12 +761,12 @@ function App() {
             <Route path="/datasets" element={<DatasetShare />} />
             <Route path="/" element={
               <div className="bg-white rounded-lg shadow-lg p-8">
-                <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
+                {/* <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
                   捕获月球多模态合成数据平台
                  
-                </h1>
+                </h1> */}
                 
-                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm" style={{ textAlign: 'center' }}>致力于打造低成本的人人都懂用的多模态合成数据解决方案<br/>助力各类大模型的微调（function calling、images、videos compresshension）、RLHF、gpto1(cot)等训练场景,欢迎加入我们或与我们合作！</div>
+                <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm" style={{ textAlign: 'center' }}>致力于打造低成本的人人都懂用的多模态合成数据平台<br/>助力各类垂直行业大模型的微调（function calling、images、videos compresshension）、RLHF、gpto1(cot)等训练场景,欢迎加入我们或与我们合作！</div>
 
                 {/* 添加导航链接 */}
                 <div className="flex flex-wrap justify-center items-center gap-4 mb-8 text-sm">
