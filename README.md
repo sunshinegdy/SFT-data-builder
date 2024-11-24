@@ -8,6 +8,8 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
 <img width="861" alt="8d5400bce0635b5e236cba05e923c44" src="https://github.com/user-attachments/assets/531dee7e-949f-4fac-b646-06ab518f5612">
+<img width="861" alt="0972de00f8afa29489cba138ecac6ac" src="https://github.com/user-attachments/assets/90202679-5a01-48a2-b80d-e6f1a06f910e">
+
 <img width="954" alt="d5445bacd9f03810e326039f9653267" src="https://github.com/user-attachments/assets/8e49cc36-b5aa-419f-a748-141b94a27161">
 <img width="954" alt="4570df76058f5bd3e996b4f6bdba9db" src="https://github.com/user-attachments/assets/a353a4ed-77e3-4c63-9948-5f6caabab764">
 
@@ -31,6 +33,7 @@
 
 - 🎯 **一键生成训练数据**：支持众多openai格式调用的本地或云端模型（包括GLM-4-Flash等免费调用模型） 将普通文本秒变高质量AI训练数据 支持直接从微信公众号文章等链接内容生成训练数据
 - 📝 **合成gpto1类的cot数据合成功能，且可同步上传至huggingface**
+- 📤 **支持vison language model的sharegpt微调格式数据合成**
 - 🔄 **批量生成**：一次生成多条不同角度的训练数据、支持批量url文章自动生成批量数据
 - 📝 **灵活编辑**：所有生成的数据都可以随时编辑和调整
 - 💾 **本地存储**：自动保存所有数据到本地
@@ -42,6 +45,9 @@
 - 📚 **主流训练格式互换**：增加了 Alpaca训练格式与Openai训练格式互换功能 支持批量文件互换格式
 
 ## 📅 更新动态
+### v1.1.4 (2024-11-24)
+- ✨ 支持vison language model的sharegpt微调格式数据合成
+
 ### v1.1.3 (2024-11-22)
 - ✨ 增加了合成gpto1类的cot数据合成功能，且可同步上传至huggingface
 
