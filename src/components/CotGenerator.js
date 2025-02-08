@@ -23,11 +23,13 @@ const CotGenerator = ({ config, fileContent, onDataGenerated }) => {
 
   // 当生成数据时，初始化可编辑的问题
   useEffect(() => {
-    if (generatedData) {
+    if (generatedData && Array.isArray(generatedData)) {
       setEditableQuestions(generatedData.map(item => ({
         question: item.question,
         isEditing: false
       })));
+    } else {
+      setEditableQuestions([]);
     }
   }, [generatedData]);
 
@@ -105,75 +107,88 @@ const CotGenerator = ({ config, fileContent, onDataGenerated }) => {
     setError('');
 
     try {
-      const response = await fetch(`${config.baseUrl}`, {
+      // 根据模式选择正确的 URL
+      const apiUrl = config.mode === 'online' ? config.baseUrl : config.localUrl;
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // 只在在线模式下添加认证头
+      if (config.mode === 'online' && config.apiKey) {
+        headers['Authorization'] = `Bearer ${config.apiKey}`;
+      }
+
+      const requestBody = {
+        model: config.model || (config.mode === 'online' ? 'deepseek-chat' : 'llama2'),
+        messages: [
+          {
+            role: 'system',
+            content: SYSTEM_PROMPT
+          },
+          {
+            role: 'user',
+            content: `参考资料：\n${fileContent}\n\n请基于以上参考资料生成${questionCount}个问题并进行推理分析。请确保返回的是标准的JSON格式，格式如下：
+            [
+              {
+                "question": "问题1",
+                "reasoning_steps": [
+                  {
+                    "title": "步骤1标题",
+                    "content": "步骤1详细内容",
+                    "next_action": "continue"
+                  },
+                  {
+                    "title": "最终结论",
+                    "content": "总结性结论",
+                    "next_action": "final_answer"
+                  }
+                ]
+              }
+            ]`
+          }
+        ],
+        stream: false
+      };
+
+      // 本地模式添加额外参数
+      if (config.mode === 'local') {
+        requestBody.options = {
+          temperature: Number(config.localOptions?.temperature ?? 0.3),
+          top_p: Number(config.localOptions?.top_p ?? 0.1),
+          num_predict: Number(config.localOptions?.num_predict ?? 20000)
+        };
+      }
+
+      // 使用 JSON 序列化和反序列化来移除任何原型属性
+      const cleanRequestBody = JSON.parse(JSON.stringify(requestBody));
+
+      console.log('请求URL:', apiUrl);
+      console.log('请求头:', headers);
+      console.log('请求体:', cleanRequestBody);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
-        },
-        body: JSON.stringify({
-          model: config.model || 'deepseek-chat',
-          messages: [
-            {
-              role: 'system',
-              content: SYSTEM_PROMPT
-            },
-            {
-              role: 'user',
-              content: `参考资料：\n${fileContent}\n\n请基于以上参考资料生成${questionCount}个问题并进行推理分析。请确保返回的是标准的JSON格式，格式如下：
-              [
-                {
-                  "question": "问题1",
-                  "reasoning_steps": [
-                    {
-                      "title": "步骤1标题",
-                      "content": "步骤1详细内容",
-                      "next_action": "continue"
-                    },
-                    {
-                      "title": "最终结论",
-                      "content": "总结性结论",
-                      "next_action": "final_answer"
-                    }
-                  ]
-                }
-              ]`
-            }
-          ],
-          stream: false
-        })
+        headers: headers,
+        body: JSON.stringify(cleanRequestBody)
       });
 
       if (!response.ok) {
-        throw new Error(`API请求失败: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API错误响应:', errorText);
+        throw new Error(`API请求失败: ${response.status}\n${errorText}`);
       }
 
       const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      // 根据模式获取正确的响应内容
+      const aiResponse = config.mode === 'online' ? 
+        data.choices[0].message.content : 
+        data.message.content;
       
-      console.log('AI原始响应:', aiResponse); // 调试用
+      console.log('AI原始响应:', aiResponse);
 
-      try {
-        const jsonData = parseAIResponse(aiResponse);
-        
-        // 修改数据结构，将最后一步的内容作为 final_answer
-        const formattedData = jsonData.map(item => {
-          const lastStep = item.reasoning_steps[item.reasoning_steps.length - 1];
-          return {
-            question: item.question,
-            reasoning_steps: item.reasoning_steps.slice(0, -1), // 除去最后一步
-            final_answer: lastStep.content
-          };
-        });
-
-        setGeneratedData(formattedData);
-        if (onDataGenerated) {
-          onDataGenerated(formattedData);
-        }
-      } catch (e) {
-        console.error('JSON解析错误:', e);
-        throw new Error(`AI响应格式错误: ${e.message}`);
-      }
+      // 直接设置原始响应
+      setGeneratedData(aiResponse);
+      setIsGenerating(false);
     } catch (err) {
       setError(`生成失败: ${err.message}`);
     } finally {
@@ -228,48 +243,62 @@ const CotGenerator = ({ config, fileContent, onDataGenerated }) => {
 
       {generatedData && (
         <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-4">生成的问题列表:</h2>
-          <div className="space-y-4">
-            {editableQuestions.map((item, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">问题 {index + 1}:</span>
-                  <button
-                    onClick={() => toggleQuestionEdit(index)}
-                    className="text-blue-500 hover:text-blue-600"
-                  >
-                    {item.isEditing ? '保存' : '编辑'}
-                  </button>
-                </div>
-                {item.isEditing ? (
-                  <textarea
-                    value={item.question}
-                    onChange={(e) => handleQuestionEdit(index, e.target.value)}
-                    className="w-full p-2 border rounded-md"
-                    rows="3"
-                  />
-                ) : (
-                  <p className="text-gray-700">{item.question}</p>
-                )}
+          {Array.isArray(generatedData) ? (
+            <>
+              <h2 className="text-xl font-semibold mb-4">生成的问题列表:</h2>
+              <div className="space-y-4">
+                {editableQuestions.map((item, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">问题 {index + 1}:</span>
+                      <button
+                        onClick={() => toggleQuestionEdit(index)}
+                        className="text-blue-500 hover:text-blue-600"
+                      >
+                        {item.isEditing ? '保存' : '编辑'}
+                      </button>
+                    </div>
+                    {item.isEditing ? (
+                      <textarea
+                        value={item.question}
+                        onChange={(e) => handleQuestionEdit(index, e.target.value)}
+                        className="w-full p-2 border rounded-md"
+                        rows="3"
+                      />
+                    ) : (
+                      <p className="text-gray-700">{item.question}</p>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-4">完整的 CoT 数据:</h2>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <pre className="whitespace-pre-wrap">
-                {JSON.stringify(generatedData, null, 2)}
-              </pre>
+              <div className="mt-4">
+                <h2 className="text-xl font-semibold mb-4">完整的 CoT 数据:</h2>
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <pre className="whitespace-pre-wrap">
+                    {JSON.stringify(generatedData, null, 2)}
+                  </pre>
+                </div>
+              </div>
+
+              <button
+                onClick={handleConfirmGeneration}
+                className="mt-4 w-full py-3 bg-green-500 text-white font-medium rounded-md hover:bg-green-600"
+              >
+                确认并添加到数据列表
+              </button>
+            </>
+          ) : (
+            // 非JSON格式时的显示
+            <div>
+              <h2 className="text-xl font-semibold mb-4">生成的 CoT 数据:</h2>
+              <div className="bg-gray-50 p-4 rounded-md">
+                <pre className="whitespace-pre-wrap text-sm">
+                  {generatedData}
+                </pre>
+              </div>
             </div>
-          </div>
-
-          <button
-            onClick={handleConfirmGeneration}
-            className="mt-4 w-full py-3 bg-green-500 text-white font-medium rounded-md hover:bg-green-600"
-          >
-            确认并添加到数据列表
-          </button>
+          )}
         </div>
       )}
     </div>

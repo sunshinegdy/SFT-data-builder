@@ -237,79 +237,214 @@ function App() {
           <form onSubmit={handleSubmit} className="mt-4 space-y-4 p-4 border rounded-lg bg-gray-50">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                API Base URL:
-              </label>
-              <input
-                type="text"
-                value={tempConfig.baseUrl}
-                onChange={(e) => setTempConfig({...tempConfig, baseUrl: e.target.value})}
-                className="w-full p-2 border rounded-md"
-                placeholder="https://api.deepseek.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                API Key:
-              </label>
-              <input
-                type="password"
-                value={tempConfig.apiKey}
-                onChange={(e) => setTempConfig({...tempConfig, apiKey: e.target.value})}
-                className="w-full p-2 border rounded-md"
-                placeholder="输入你的 API Key"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                模型:
+                模式:
               </label>
               <select
-                value={tempConfig.model}
+                value={tempConfig.mode}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === 'custom') {
-                    // 如果选择自定义，保持当前的自定义模型名
-                    setTempConfig({
-                      ...tempConfig,
-                      model: tempConfig.customModel || ''
-                    });
-                  } else {
-                    // 如果选择预设模型，更新模型名称
-                    setTempConfig({
-                      ...tempConfig,
-                      model: value,
-                      customModel: '' // 清空自定义模型
-                    });
-                  }
-                }}
-                className="w-full p-2 border rounded-md mb-2"
-              >
-                {defaultConfig.modelOptions.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-                <option value="custom">自定义模型</option>
-              </select>
-              
-              {/* 自定义模型输入框 */}
-              <input
-                type="text"
-                value={tempConfig.customModel}
-                onChange={(e) => {
-                  const value = e.target.value;
+                  const newMode = e.target.value;
                   setTempConfig({
                     ...tempConfig,
-                    customModel: value,
-                    model: value || tempConfig.model // 如果输入为空，保持原有模型
+                    mode: newMode,
+                    model: newMode === 'online' ? defaultConfig.modelOptions[0] : '',
+                    customModel: ''
                   });
                 }}
                 className="w-full p-2 border rounded-md"
-                placeholder="输入自定义模型名称"
-              />
+              >
+                <option value="online">在线模式</option>
+                <option value="local">本地模式（Ollama）</option>
+              </select>
             </div>
+
+            {tempConfig.mode === 'online' ? (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    API Base URL:
+                  </label>
+                  <input
+                    type="text"
+                    value={tempConfig.baseUrl}
+                    onChange={(e) => setTempConfig({...tempConfig, baseUrl: e.target.value})}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="https://api.deepseek.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    API Key:
+                  </label>
+                  <input
+                    type="password"
+                    value={tempConfig.apiKey}
+                    onChange={(e) => setTempConfig({...tempConfig, apiKey: e.target.value})}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="输入你的 API Key"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    模型:
+                  </label>
+                  <select
+                    value={tempConfig.model}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === 'custom') {
+                        setTempConfig({
+                          ...tempConfig,
+                          model: tempConfig.customModel || ''
+                        });
+                      } else {
+                        setTempConfig({
+                          ...tempConfig,
+                          model: value,
+                          customModel: ''
+                        });
+                      }
+                    }}
+                    className="w-full p-2 border rounded-md mb-2"
+                  >
+                    {defaultConfig.modelOptions.map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
+                    <option value="custom">自定义模型</option>
+                  </select>
+                  
+                  {tempConfig.model === 'custom' && (
+                    <input
+                      type="text"
+                      value={tempConfig.customModel}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setTempConfig({
+                          ...tempConfig,
+                          customModel: value,
+                          model: value || tempConfig.model
+                        });
+                      }}
+                      className="w-full p-2 border rounded-md"
+                      placeholder="输入自定义模型名称"
+                    />
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    本地 API URL:
+                  </label>
+                  <input
+                    type="text"
+                    value={tempConfig.localUrl}
+                    onChange={(e) => setTempConfig({...tempConfig, localUrl: e.target.value})}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="http://localhost:11434/api/chat"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    模型名称:
+                  </label>
+                  <input
+                    type="text"
+                    value={tempConfig.model}
+                    onChange={(e) => setTempConfig({...tempConfig, model: e.target.value})}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="输入Ollama模型名称，如：llama2"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    模型参数设置:
+                  </label>
+                  
+                  <div>
+                    <label className="block text-xs text-gray-600">
+                      Temperature (0-1):
+                    </label>
+                    <input
+                      type="number"
+                      value={tempConfig.localOptions?.temperature ?? defaultConfig.localOptions.temperature}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value) && value >= 0 && value <= 1) {
+                          setTempConfig({
+                            ...tempConfig,
+                            localOptions: {
+                              ...tempConfig.localOptions,
+                              temperature: value
+                            }
+                          });
+                        }
+                      }}
+                      step="0.1"
+                      min="0"
+                      max="1"
+                      className="w-full p-2 border rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-600">
+                      Top P (0-1):
+                    </label>
+                    <input
+                      type="number"
+                      value={tempConfig.localOptions?.top_p ?? defaultConfig.localOptions.top_p}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value) && value >= 0 && value <= 1) {
+                          setTempConfig({
+                            ...tempConfig,
+                            localOptions: {
+                              ...tempConfig.localOptions,
+                              top_p: value
+                            }
+                          });
+                        }
+                      }}
+                      step="0.1"
+                      min="0"
+                      max="1"
+                      className="w-full p-2 border rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-600">
+                      生成Token数量限制:
+                    </label>
+                    <input
+                      type="number"
+                      value={tempConfig.localOptions?.num_predict ?? defaultConfig.localOptions.num_predict}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        if (!isNaN(value) && value > 0) {
+                          setTempConfig({
+                            ...tempConfig,
+                            localOptions: {
+                              ...tempConfig.localOptions,
+                              num_predict: value
+                            }
+                          });
+                        }
+                      }}
+                      min="1"
+                      className="w-full p-2 border rounded-md"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -518,11 +653,17 @@ function App() {
   };
 
   // 修改 generateAIResponse 函数
-  const generateAIResponse = async (content) => {
+  const generateAIResponse = async (content, dataType = 'chat') => {
     try {
       setIsLoading(true);
       
-      const modelName = config.model || 'deepseek-chat';
+      console.log('========== 开始生成AI响应 ==========');
+      console.log('用户输入内容:', content);
+      console.log('当前模式:', config.mode);
+      console.log('使用的模型:', config.model);
+      console.log('数据类型:', dataType);
+      
+      const modelName = config.model || (config.mode === 'online' ? 'deepseek-chat' : 'llama2');
       const systemPrompt = dataType === 'cot' ? COT_SYSTEM_PROMPT : 
         `你是一个大模型训练数据生成助手。请将用户输入的内容转换为${config.suggestionsCount}条训练数据，每条都符合以下格式，并确保返回的是一个有效的JSON数组：
         [
@@ -531,47 +672,98 @@ function App() {
             "input": "用户输入（可选）",
             "output": "AI回答",
             "system": "系统提示词（可选）",
-            "history": [["历史问题1", "历史回答1"], ["历史问题2", "历史回答2"]]
+           "history": [["历史问题1", "历史回答1"], ["历史问题2", "历史回答2"]]
           }
-        ]
-        
-        确保每条数据都有不同的角度或重点。
-        注意：请确保返回的是一个标准的JSON数组，不要添加任何额外的格式或说明。`;
+       ]
+       确保每条数据都有不同的角度或重点。
+       注意：请确保返回的是一个标准的JSON数组，不要添加任何额外的格式或说明。`;
 
-      const response = await fetch(`${config.baseUrl}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
+      console.log('系统提示词:', systemPrompt);
+
+      const apiUrl = config.mode === 'online' ? config.baseUrl : config.localUrl;
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // 只在在线模式下添加认证头
+      if (config.mode === 'online' && config.apiKey) {
+        headers['Authorization'] = `Bearer ${config.apiKey}`;
+      }
+
+      const requestBody = config.mode === 'online' ? {
+        model: modelName,
+        max_tokens: 4096,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: `请基于以下内容生成数据：\n${content}`
+          }
+        ],
+        stream: false
+      } : {
+        model: modelName,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: content
+          }
+        ],
+        options: {
+          temperature: config.localOptions?.temperature ?? defaultConfig.localOptions.temperature,
+          top_p: config.localOptions?.top_p ?? defaultConfig.localOptions.top_p,
+          num_predict: dataType === 'cot' ? 2000 : (config.localOptions?.num_predict ?? defaultConfig.localOptions.num_predict)
         },
-        body: JSON.stringify({
-          model: modelName,
-          max_tokens: 4096,
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            {
-              role: 'user',
-              content: `请基于以下内容生成数据：\n${content}`
-            }
-          ],
-          stream: false
-        })
+        stream: false
+      };
+
+      console.log('请求URL:', apiUrl);
+      console.log('请求头:', JSON.stringify(headers, null, 2));
+      console.log('请求体:', JSON.stringify(requestBody, null, 2));
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        throw new Error(`API 请求失败: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API错误响应:', errorText);
+        throw new Error(`API 请求失败: ${response.status}\n${errorText}`);
       }
 
       const data = await response.json();
+      console.log('API响应:', JSON.stringify(data, null, 2));
       
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        const aiResponse = data.choices[0].message.content;
-        
-        // 解析JSON响应
-        let jsonContent;
+      let aiResponse;
+      if (config.mode === 'online') {
+        aiResponse = data.choices[0].message.content;
+      } else {
+        // Ollama 的响应格式
+        aiResponse = data.message.content;
+      }
+
+      // 构造标准格式的响应数据
+      let jsonContent;
+      if (config.mode === 'local') {
+        // 本地模式：直接构造单条数据
+        jsonContent = [{
+          instruction: "用户输入",
+          input: content,
+          output: aiResponse,
+          system: "",
+          history: []
+        }];
+      } else {
+        // 在线模式：尝试解析JSON响应
         const patterns = [
           /```json\s*(\[[\s\S]*?\])\s*```/,
           /```\s*(\[[\s\S]*?\])\s*```/,
@@ -604,44 +796,42 @@ function App() {
             console.log('直接解析失败');
           }
         }
+      }
 
-        if (jsonContent && Array.isArray(jsonContent)) {
-          if (dataType === 'cot') {
-            // 处理 CoT 类型的响应
-            const cotData = jsonContent.map(item => ({
-              instruction: item.question,
-              input: JSON.stringify(item.reasoning_steps, null, 2),
-              output: item.reasoning_steps[item.reasoning_steps.length - 1].content,
-              type: 'cot'
-            }));
-            setAiSuggestions(cotData);
-            setCurrentSuggestionIndex(0);
-            setFormData(cotData[0]);
-          } else {
-            // 处理对话类型的响应
-            const cleanedResponses = jsonContent.map(item => ({
-              instruction: (item.instruction || '').trim(),
-              input: (item.input || '').trim(),
-              output: (item.output || '').trim(),
-              system: (item.system || '').trim(),
-              history: Array.isArray(item.history) ? item.history.map(([q, a]) => [
-                (q || '').trim(),
-                (a || '').trim()
-              ]) : [['', '']]
-            })).filter(item => item.instruction && item.output);
-
-            if (cleanedResponses.length > 0) {
-              setAiSuggestions(cleanedResponses);
-              setCurrentSuggestionIndex(0);
-              setFormData(cleanedResponses[0]);
-            }
-          }
-          setError(null);
+      if (jsonContent && Array.isArray(jsonContent)) {
+        if (dataType === 'cot') {
+          // 处理 CoT 类型的响应
+          const cotData = jsonContent.map(item => ({
+            instruction: item.question || "问题",
+            input: JSON.stringify(item.reasoning_steps || [], null, 2),
+            output: item.reasoning_steps ? item.reasoning_steps[item.reasoning_steps.length - 1].content : aiResponse,
+            type: 'cot'
+          }));
+          setAiSuggestions(cotData);
+          setCurrentSuggestionIndex(0);
+          setFormData(cotData[0]);
         } else {
-          throw new Error('未能提取有效的训练数据');
+          // 处理对话类型的响应
+          const cleanedResponses = jsonContent.map(item => ({
+            instruction: (item.instruction || '').trim(),
+            input: (item.input || '').trim(),
+            output: (item.output || '').trim(),
+            system: (item.system || '').trim(),
+            history: Array.isArray(item.history) ? item.history.map(([q, a]) => [
+              (q || '').trim(),
+              (a || '').trim()
+            ]) : []
+          })).filter(item => item.instruction || item.output);
+
+          if (cleanedResponses.length > 0) {
+            setAiSuggestions(cleanedResponses);
+            setCurrentSuggestionIndex(0);
+            setFormData(cleanedResponses[0]);
+          }
         }
+        setError(null);
       } else {
-        throw new Error('API 响应格式不正确');
+        throw new Error('未能提取有效的训练数据');
       }
     } catch (err) {
       console.error('API 调用错误:', err);
@@ -804,7 +994,6 @@ function App() {
                     </svg>
                     <span>X推特：正经人王同学</span>
                   </a>
-
                   <a
                     href="mailto:3038880699@qq.com"
                     className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
@@ -847,7 +1036,7 @@ function App() {
                     <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
                         </svg>
                         <p className="mb-2 text-sm text-gray-500">
                           <span className="font-semibold">点击上传</span> 或拖拽文件到这里
@@ -1230,5 +1419,3 @@ function App() {
 }
 
 export default App;
-
-  
